@@ -1,0 +1,40 @@
+# --- Header (top-level) ---
+modLoader="javafml"
+loaderVersion="${loader_version_range}"
+license="${mod_license}"
+# Optional:
+# issueTrackerURL="https://github.com/YourName/Ascendant-Crafting/issues"
+# displayURL="https://your.mod.homepage/"   # if you want this, keep it INSIDE [[mods]] (see below)
+# logoFile="examplemod.png"                  # if you want this, keep it INSIDE [[mods]]
+# credits="Thanks to ..."                    # if you want this, keep it INSIDE [[mods]]
+
+# --- Mods block (one per mod) ---
+[[mods]]
+modId="${mod_id}"
+version="${mod_version}"     # auto from Gradle/Jar
+displayName="${mod_name}"
+authors="${mod_authors}"
+description='''${mod_description}'''
+# Optional (these belong here, not top-level):
+# displayURL="https://your.mod.homepage/"
+# logoFile="examplemod.png"
+# credits=""
+
+# --- Dependencies ---
+[[dependencies.${mod_id}]]
+modId="forge"
+mandatory=true
+versionRange="${forge_version_range}"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.${mod_id}]]
+modId="minecraft"
+mandatory=true
+versionRange="${minecraft_version_range}"
+ordering="NONE"
+side="BOTH"
+
+# --- Features (optional) ---
+#[features.${mod_id}]
+#openGLVersion="[3.2,)"
