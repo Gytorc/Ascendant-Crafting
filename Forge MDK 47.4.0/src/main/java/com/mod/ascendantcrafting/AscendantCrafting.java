@@ -1,4 +1,4 @@
-package com.yourname.ascendantcrafting;
+package com.mod.ascendantcrafting;
 
 import net.minecraftforge.fml.common.Mod;
 
