@@ -1,5 +1,6 @@
-package com.mod.ascendantcrafting.client;
+package com.mod.ascendantcrafting;
 
+import com.mod.ascendantcrafting.AscendantCrafting; // for MODID
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;

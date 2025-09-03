@@ -1,4 +1,4 @@
-package com.mod.ascendantcrafting.client
+package com.mod.ascendantcrafting;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;

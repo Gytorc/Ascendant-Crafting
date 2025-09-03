@@ -1,10 +1,12 @@
-package com.mod.ascendantcrafting.client;
+package com.mod.ascendantcrafting.screen;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
+import com.mod.ascendantcrafting.menu.PersistentWorkbenchMenu;
+
 
 public class PersistentWorkbenchScreen extends AbstractContainerScreen<PersistentWorkbenchMenu> {
     // You can keep your previous constructor call if you like. This factory avoids the deprecation warning.

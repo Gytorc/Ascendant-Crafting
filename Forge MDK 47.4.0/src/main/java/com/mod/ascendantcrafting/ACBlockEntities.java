@@ -1,5 +1,6 @@
-package com.mod.ascendantcrafting.client;
+package com.mod.ascendantcrafting;
 
+import com.mod.ascendantcrafting.AscendantCrafting;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;

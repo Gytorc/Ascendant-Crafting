@@ -14,7 +14,7 @@ public class AscendantCrafting {
         ACBlocks.BLOCKS.register(modBus);
         ACItems.ITEMS.register(modBus);
         ACBlockEntities.BLOCK_ENTITIES.register(modBus);
-        ACMenus.MENUS.register(modBus);               // <-- this is the key one for your crash
+        ACMenus.MENUS.register(modBus);
         // (Register other DeferredRegisters here as you add them)
     }
 }

@@ -1,4 +1,4 @@
-package com.mod.ascendantcrafting.client;
+package com.mod.ascendantcrafting;
 
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
