@@ -24,9 +24,11 @@ import javax.annotation.Nullable;
 
 public class PersistentWorkbenchBlock extends Block implements EntityBlock {
 
-    public PersistentWorkbenchBlock(Properties properties) {
-        super(properties);
+    public PersistentWorkbenchBlock(Properties props) {
+        super(props);
     }
+
+    // --- Block Entity --------------------------------------------------------
 
     @Nullable
     @Override
@@ -34,37 +36,46 @@ public class PersistentWorkbenchBlock extends Block implements EntityBlock {
         return new PersistentWorkbenchBlockEntity(pos, state);
     }
 
+    // --- Use / Open Menu -----------------------------------------------------
+
     @Override
     public InteractionResult use(BlockState state, Level level, BlockPos pos,
                                  Player player, InteractionHand hand, BlockHitResult hit) {
         if (!level.isClientSide && player instanceof ServerPlayer sp) {
-            BlockEntity be = level.getBlockEntity(pos);
-            if (be instanceof PersistentWorkbenchBlockEntity workbench) {
-                MenuProvider provider = new MenuProvider() {
-                    @Override
-                    public Component getDisplayName() {
-                        return Component.translatable("block.ascendantcrafting.ascendant_workbench");
-                    }
 
-                    @Override
-                    public AbstractContainerMenu createMenu(int id, Inventory inv, Player p) {
-                        // Pass level+pos via ContainerLevelAccess to match the menu constructor
-                        return new PersistentWorkbenchMenu(id, inv, ContainerLevelAccess.create(level, pos));
-                    }
-                };
-                // Sends BlockPos to client; your IForgeMenuType factory can read it (buf.readBlockPos)
-                NetworkHooks.openScreen(sp, provider, pos);
-            }
+            // Sanity ping so you know this ran server-side
+            sp.sendSystemMessage(Component.literal("[AC] Opening Ascendant Workbench @ " + pos));
+
+            // Provide a menu for NetworkHooks to open
+            MenuProvider provider = new MenuProvider() {
+                @Override
+                public Component getDisplayName() {
+                    return Component.translatable("block.ascendantcrafting.ascendant_workbench");
+                }
+
+                @Override
+                public AbstractContainerMenu createMenu(int id, Inventory inv, Player p) {
+                    // IMPORTANT: We bind to this block position via ContainerLevelAccess
+                    return new PersistentWorkbenchMenu(id, inv, net.minecraft.world.inventory.ContainerLevelAccess.create(level, pos));
+                }
+            };
+
+            // This also writes the BlockPos to the buffer for the client
+            NetworkHooks.openScreen(sp, provider, pos);
         }
+
         return InteractionResult.sidedSuccess(level.isClientSide);
     }
 
+    // --- Break / Drop Contents ----------------------------------------------
+
     @Override
-    public void onRemove(BlockState oldState, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
+    public void onRemove(BlockState oldState, Level level, BlockPos pos,
+                         BlockState newState, boolean movedByPiston) {
         if (!oldState.is(newState.getBlock())) {
             BlockEntity be = level.getBlockEntity(pos);
             if (be instanceof PersistentWorkbenchBlockEntity workbench) {
-                // Drop contents stored in the workbench
+                // Drop stored items from our internal inventory
                 Containers.dropContents(level, pos, workbench.asContainerForDrops());
             }
         }

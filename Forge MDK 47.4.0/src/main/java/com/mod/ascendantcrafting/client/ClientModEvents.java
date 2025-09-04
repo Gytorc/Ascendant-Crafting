@@ -11,9 +11,11 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
 @Mod.EventBusSubscriber(modid = AscendantCrafting.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public final class ClientModEvents {
+    private ClientModEvents() {}
+
     @SubscribeEvent
-    public static void onClientSetup(FMLClientSetupEvent e) {
-        e.enqueueWork(() ->
+    public static void onClientSetup(FMLClientSetupEvent event) {
+        event.enqueueWork(() ->
                 MenuScreens.register(ACMenus.ASCENDANT_WORKBENCH_MENU.get(), PersistentWorkbenchScreen::new)
         );
     }

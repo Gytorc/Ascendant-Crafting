@@ -1,17 +1,14 @@
 package com.mod.ascendantcrafting.screen;
 
-import net.minecraft.client.gui.GuiGraphics;
+import com.mod.ascendantcrafting.menu.PersistentWorkbenchMenu;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
-import com.mod.ascendantcrafting.menu.PersistentWorkbenchMenu;
-
 
 public class PersistentWorkbenchScreen extends AbstractContainerScreen<PersistentWorkbenchMenu> {
-    // You can keep your previous constructor call if you like. This factory avoids the deprecation warning.
     private static final ResourceLocation TEX =
-            ResourceLocation.fromNamespaceAndPath("minecraft", "textures/gui/container/crafting_table.png");
+            new ResourceLocation("minecraft", "textures/gui/container/crafting_table.png");
 
     public PersistentWorkbenchScreen(PersistentWorkbenchMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
@@ -20,22 +17,22 @@ public class PersistentWorkbenchScreen extends AbstractContainerScreen<Persisten
     }
 
     @Override
-    protected void renderBg(GuiGraphics g, float partialTick, int mouseX, int mouseY) {
-        g.blit(TEX, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
+    protected void renderBg(net.minecraft.client.gui.GuiGraphics g, float partialTicks, int mouseX, int mouseY) {
+        int x = (this.width - this.imageWidth) / 2;
+        int y = (this.height - this.imageHeight) / 2;
+        g.blit(TEX, x, y, 0, 0, this.imageWidth, this.imageHeight);
     }
 
     @Override
-    protected void renderLabels(GuiGraphics g, int mouseX, int mouseY) {
-        // Title near top-left, player inventory label above player inv grid
-        g.drawString(this.font, this.title, 28, 6, 0x404040, false);
+    protected void renderLabels(net.minecraft.client.gui.GuiGraphics g, int mouseX, int mouseY) {
+        g.drawString(this.font, this.title, 8, 6, 0x404040, false);
         g.drawString(this.font, this.playerInventoryTitle, 8, this.imageHeight - 96 + 2, 0x404040, false);
     }
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+    public void render(net.minecraft.client.gui.GuiGraphics g, int mouseX, int mouseY, float partialTicks) {
         this.renderBackground(g);
-        super.render(g, mouseX, mouseY, partialTick);
+        super.render(g, mouseX, mouseY, partialTicks);
         this.renderTooltip(g, mouseX, mouseY);
     }
 }
-

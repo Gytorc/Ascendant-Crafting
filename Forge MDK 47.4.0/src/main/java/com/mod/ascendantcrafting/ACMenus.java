@@ -1,28 +1,27 @@
 package com.mod.ascendantcrafting;
 
-import com.mod.ascendantcrafting.AscendantCrafting; // for MODID
 import com.mod.ascendantcrafting.menu.PersistentWorkbenchMenu;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraftforge.common.extensions.IForgeMenuType;
-import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
-public final class ACMenus {
+public class ACMenus {
     public static final DeferredRegister<MenuType<?>> MENUS =
-            DeferredRegister.create(ForgeRegistries.MENU_TYPES, "ascendantcrafting");
+            DeferredRegister.create(ForgeRegistries.MENU_TYPES, AscendantCrafting.MODID);
 
     public static final RegistryObject<MenuType<PersistentWorkbenchMenu>> ASCENDANT_WORKBENCH_MENU =
-            MENUS.register("ascendant_workbench",
-                    () -> IForgeMenuType.create((windowId, inv, buf) ->
-                            new PersistentWorkbenchMenu(windowId, inv,
-                                    // If you want position context later:
-                                    // ContainerLevelAccess.NULL or read BlockPos from buf
-                                    net.minecraft.world.inventory.ContainerLevelAccess.NULL)));
-
-    public static void register(IEventBus bus) {
-        MENUS.register(bus);
-    }
+            MENUS.register("ascendant_workbench", () ->
+                    IForgeMenuType.create((id, inv, buf) -> {
+                        BlockPos pos = buf.readBlockPos();
+                        return new PersistentWorkbenchMenu(
+                                id,
+                                inv,
+                                ContainerLevelAccess.create(inv.player.level(), pos)
+                        );
+                    })
+            );
 }
-
