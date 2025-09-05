@@ -3,6 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/Ascendant-Crafting.iml" filepath="$PROJECT_DIR$/.idea/Ascendant-Crafting.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Forge_MDK_47.4.0.main.iml" filepath="$PROJECT_DIR$/.idea/modules/Forge_MDK_47.4.0.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Forge_MDK_47.4.0.test.iml" filepath="$PROJECT_DIR$/.idea/modules/Forge_MDK_47.4.0.test.iml" />
     </modules>
   </component>
 </project>

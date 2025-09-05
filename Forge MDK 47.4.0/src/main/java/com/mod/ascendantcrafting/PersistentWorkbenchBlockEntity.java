@@ -7,75 +7,131 @@ import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class PersistentWorkbenchBlockEntity extends BlockEntity implements Container {
-    // 3x3 grid
-    private final NonNullList<ItemStack> items = NonNullList.withSize(9, ItemStack.EMPTY);
+/**
+ * Block Entity for the Ascendant Workbench.
+ * - Persistent 3x3 crafting grid (9 slots)
+ * - Persistent storage (54 slots)
+ * - Clean NBT save/load
+ */
+public class PersistentWorkbenchBlockEntity extends BlockEntity {
+
+    private static final String TAG_CRAFT   = "Craft";
+    private static final String TAG_STORAGE = "Storage";
+
+    // 3x3 crafting inventory
+    private final SimpleContainer craft = new SimpleContainer(9) {
+        @Override public void setChanged() {
+            super.setChanged();
+            PersistentWorkbenchBlockEntity.this.setChanged();
+        }
+    };
+
+    // 6x9 storage inventory (54 slots)
+    private final SimpleContainer storage = new SimpleContainer(54) {
+        @Override public void setChanged() {
+            super.setChanged();
+            PersistentWorkbenchBlockEntity.this.setChanged();
+        }
+    };
 
     public PersistentWorkbenchBlockEntity(BlockPos pos, BlockState state) {
-        // Make sure this name matches your registration in ACBlockEntities
+        // NOTE: Adjust ACBlockEntities.WORKBENCH_BE if your registry name differs.
         super(ACBlockEntities.WORKBENCH_BE.get(), pos, state);
     }
 
-    /* ------------ Container implementation (used by the menu wrapper) ------------ */
+    /* ---------------- Crafting (3x3) helpers used by the menu wrapper ---------------- */
 
-    @Override public int getContainerSize() { return items.size(); }
+    public ItemStack getCraftItem(int i) { return craft.getItem(i); }
 
-    @Override public boolean isEmpty() {
-        for (ItemStack s : items) if (!s.isEmpty()) return false;
-        return true;
+    public ItemStack removeCraftItem(int i, int count) { return craft.removeItem(i, count); }
+
+    public ItemStack removeCraftItemNoUpdate(int i) { return craft.removeItemNoUpdate(i); }
+
+    public void setCraftItem(int i, ItemStack stack) { craft.setItem(i, stack); }
+
+    /** Optional access if you ever want a direct Container. */
+    public Container getCraftContainer() { return craft; }
+
+    /* ---------------- Storage (54) access used by the menu’s StorageWindow ---------------- */
+
+    /** The menu expects a Container here; SimpleContainer is perfect. */
+    public Container getStorageContainer() { return storage; }
+
+    /* ---------------- Drops helper ---------------- */
+
+    /**
+     * Combined view of craft + storage, for clean dropping when the block is removed.
+     */
+    public Container asContainerForDrops() {
+        int total = craft.getContainerSize() + storage.getContainerSize();
+        SimpleContainer drop = new SimpleContainer(total);
+        int idx = 0;
+        for (int i = 0; i < craft.getContainerSize(); i++) {
+            drop.setItem(idx++, craft.getItem(i).copy());
+        }
+        for (int i = 0; i < storage.getContainerSize(); i++) {
+            drop.setItem(idx++, storage.getItem(i).copy());
+        }
+        return drop;
     }
 
-    @Override public ItemStack getItem(int index) { return items.get(index); }
-
-    @Override public ItemStack removeItem(int index, int count) {
-        ItemStack res = ContainerHelper.removeItem(items, index, count);
-        if (!res.isEmpty()) setChanged();
-        return res;
-    }
-
-    @Override public ItemStack removeItemNoUpdate(int index) {
-        ItemStack stack = items.get(index);
-        if (stack.isEmpty()) return ItemStack.EMPTY;
-        items.set(index, ItemStack.EMPTY);
-        return stack;
-    }
-
-    @Override public void setItem(int index, ItemStack stack) {
-        items.set(index, stack);
-        if (stack.getCount() > stack.getMaxStackSize()) stack.setCount(stack.getMaxStackSize());
-        setChanged();
-    }
-
-    @Override public void setChanged() { super.setChanged(); }
-
-    @Override public boolean stillValid(Player player) { return true; }
-
-    @Override public void clearContent() { items.clear(); }
-
-    /* ------------ Persistence ------------ */
+    /* ---------------- NBT persistence ---------------- */
 
     @Override
     protected void saveAdditional(CompoundTag tag) {
         super.saveAdditional(tag);
-        ContainerHelper.saveAllItems(tag, this.items);
+
+        // Save craft
+        NonNullList<ItemStack> craftList = NonNullList.withSize(craft.getContainerSize(), ItemStack.EMPTY);
+        for (int i = 0; i < craft.getContainerSize(); i++) craftList.set(i, craft.getItem(i));
+        CompoundTag craftTag = new CompoundTag();
+        ContainerHelper.saveAllItems(craftTag, craftList);
+        tag.put(TAG_CRAFT, craftTag);
+
+        // Save storage
+        NonNullList<ItemStack> storageList = NonNullList.withSize(storage.getContainerSize(), ItemStack.EMPTY);
+        for (int i = 0; i < storage.getContainerSize(); i++) storageList.set(i, storage.getItem(i));
+        CompoundTag storageTag = new CompoundTag();
+        ContainerHelper.saveAllItems(storageTag, storageList);
+        tag.put(TAG_STORAGE, storageTag);
     }
 
     @Override
     public void load(CompoundTag tag) {
         super.load(tag);
-        ContainerHelper.loadAllItems(tag, this.items);
+
+        // Load craft
+        NonNullList<ItemStack> craftList = NonNullList.withSize(craft.getContainerSize(), ItemStack.EMPTY);
+        ContainerHelper.loadAllItems(tag.getCompound(TAG_CRAFT), craftList);
+        for (int i = 0; i < craft.getContainerSize(); i++) craft.setItem(i, craftList.get(i));
+
+        // Load storage
+        NonNullList<ItemStack> storageList = NonNullList.withSize(storage.getContainerSize(), ItemStack.EMPTY);
+        ContainerHelper.loadAllItems(tag.getCompound(TAG_STORAGE), storageList);
+        for (int i = 0; i < storage.getContainerSize(); i++) storage.setItem(i, storageList.get(i));
     }
 
-    /* ------------ Helpers ------------ */
+    /* ---------------- Misc ---------------- */
 
-    /** Used by the block on break to drop contents. */
-    public Container asContainerForDrops() {
-        // SimpleContainer copies the array; safe to hand to drop routine
-        return new SimpleContainer(items.toArray(new ItemStack[0]));
+    @Override
+    public void setChanged() {
+        super.setChanged();
+        if (this.level != null && !this.level.isClientSide) {
+            this.level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+        }
+    }
+
+    /** If you add distance checks in your menu, this can help. */
+    public boolean stillValid(Player player) {
+        if (this.level == null || this.level.getBlockEntity(this.worldPosition) != this) return false;
+        return player.distanceToSqr(
+                (double) this.worldPosition.getX() + 0.5D,
+                (double) this.worldPosition.getY() + 0.5D,
+                (double) this.worldPosition.getZ() + 0.5D
+        ) <= 64.0D;
     }
 }
